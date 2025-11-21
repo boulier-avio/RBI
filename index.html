@@ -3,59 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> ADF sur RBI - Radio Bear Indicator</title>
+    <title>ADF sur RBI - Radio Bear Indicator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
         
         h1 {
             color: #333;
             margin-bottom: 10px;
             text-align: center;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
         }
         
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
+            width: 100%;
+            max-width: 1200px;
         }
         
         .instructions {
             background-color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 900px;
+            width: 100%;
             text-align: center;
+        }
+        
+        .instructions p {
+            margin: 8px 0;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            line-height: 1.4;
         }
         
         .controls {
             display: flex;
-            gap: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
             align-items: center;
+            width: 100%;
         }
         
         button {
-            padding: 10px 20px;
+            padding: 12px 16px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            flex: 1;
+            min-width: 140px;
+            max-width: 200px;
         }
         
         button:hover {
             background-color: #45a049;
+        }
+        
+        #rbiCanvas {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            overflow: hidden;
+        }
+        
+        /* Styles pour mobile en portrait */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                gap: 10px;
+            }
+            
+            .instructions {
+                padding: 10px;
+            }
+            
+            .controls {
+                gap: 8px;
+            }
+            
+            button {
+                min-width: 120px;
+                padding: 10px 12px;
+            }
+        }
+        
+        /* Styles pour mobile en paysage */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .container {
+                gap: 8px;
+            }
+            
+            .instructions {
+                padding: 8px;
+            }
+            
+            .controls {
+                gap: 6px;
+            }
+            
+            button {
+                min-width: 110px;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Très petits écrans */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .instructions p {
+                font-size: 0.8rem;
+            }
+            
+            button {
+                min-width: 100px;
+                padding: 8px 10px;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -104,6 +193,12 @@
         // Variables booléennes
         let reponse = false;
         
+        // Variables pour le responsive
+        let canvasWidth, canvasHeight;
+        let scaleFactor = 1;
+        let baseWidth = 1200;
+        let baseHeight = 700;
+
         function preload() {
             // Chargement des images - Remplacez par vos propres images
             imgRBIcadre = loadImage('RBIcadre.png');
@@ -115,7 +210,8 @@
         }
 
         function setup() {
-            let canvas = createCanvas(1200, 700);
+            calculateCanvasSize();
+            let canvas = createCanvas(canvasWidth, canvasHeight);
             canvas.parent('rbiCanvas');
             
             imageMode(CENTER);
@@ -126,11 +222,34 @@
             textFont('Arial');
         }
 
+        function calculateCanvasSize() {
+            const container = document.getElementById('rbiCanvas').parentElement;
+            const maxWidth = container.clientWidth;
+            const maxHeight = window.innerHeight * 0.6; // 60% de la hauteur de la fenêtre
+            
+            // Calcul du facteur d'échelle
+            const widthRatio = maxWidth / baseWidth;
+            const heightRatio = maxHeight / baseHeight;
+            
+            scaleFactor = Math.min(widthRatio, heightRatio, 1); // Ne pas agrandir au-delà de la taille originale
+            
+            canvasWidth = baseWidth * scaleFactor;
+            canvasHeight = baseHeight * scaleFactor;
+        }
+
+        function windowResized() {
+            calculateCanvasSize();
+            resizeCanvas(canvasWidth, canvasHeight);
+        }
+
         function draw() {
             RBI();
         }
 
         function RBI() {
+            // Appliquer le facteur d'échelle
+            scale(scaleFactor);
+            
             let NDBX = 776;
             let NDBY = 264;
             let GT1 = map(GT, 0, -359, 0, 359);
@@ -149,7 +268,7 @@
             }
 
             // Grille de référence
-            strokeWeight(2);
+            strokeWeight(2 / scaleFactor);
             stroke(0);
             line(NDBX - 100, NDBY, NDBX + 100, NDBY);
             line(NDBX, NDBY - 100, NDBX, NDBY + 100);
@@ -214,13 +333,12 @@
             
             // Conditions de rotation
             updateRotations();
-            
         }
 
         function drawRBIFrame() {
             fill(200);
             stroke(0);
-            strokeWeight(3);
+            strokeWeight(3 / scaleFactor);
             ellipse(268, 264, 536, 536);
             
             // Marques de degrés
@@ -231,18 +349,18 @@
                 translate(268, 264);
                 rotate(radians(i * 10));
                 if (i % 3 === 0) {
-                    textSize(16);
+                    textSize(16 / scaleFactor);
                     let angle = (360 - (i * 10)) % 360;
                     push();
                     rotate(radians(-i * 10));
                     text(angle, 0, -230);
                     pop();
                     stroke(0);
-                    strokeWeight(3);
+                    strokeWeight(3 / scaleFactor);
                     line(0, -250, 0, -268);
                 } else {
                     stroke(0);
-                    strokeWeight(1);
+                    strokeWeight(1 / scaleFactor);
                     line(0, -260, 0, -268);
                 }
                 pop();
@@ -252,10 +370,10 @@
         function drawNDB(x, y) {
             fill(255, 0, 0);
             stroke(0);
-            strokeWeight(2);
+            strokeWeight(2 / scaleFactor);
             ellipse(x, y, 80, 80);
             fill(255);
-            textSize(14);
+            textSize(14 / scaleFactor);
             text("NDB", x, y);
         }
 
@@ -269,7 +387,7 @@
         function drawRose() {
             fill(240);
             stroke(0);
-            strokeWeight(2);
+            strokeWeight(2 / scaleFactor);
             ellipse(0, 0, 500, 500);
             
             // Marques de la rose
@@ -280,11 +398,11 @@
                 rotate(radians(i * 10));
                 if (i % 3 === 0) {
                     stroke(0);
-                    strokeWeight(2);
+                    strokeWeight(2 / scaleFactor);
                     line(0, -230, 0, -250);
                 } else {
                     stroke(0);
-                    strokeWeight(1);
+                    strokeWeight(1 / scaleFactor);
                     line(0, -240, 0, -250);
                 }
                 pop();
@@ -311,32 +429,32 @@
             triangle(253, 39, 288, 39, 271, 109);
         }
 
-       function drawAnswers() {
-    textSize(20);
-    fill(255, 8, 8);
-    
-    let startX = 650;  // Position X plus à gauche
-    let startY = 450;
-    let lineHeight = 30;
-    
-    // Alignement à gauche
-    textAlign(LEFT, CENTER);
-    
-    if (reponse) {
-        text("GT = " + Math.round(gisement) + "°", startX, startY);
-        text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
-        text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
-        text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
-    } else {
-        text("GT = ?", startX, startY);
-        text("QDM = ?", startX, startY + lineHeight);
-        text("QDR = ?", startX, startY + lineHeight * 2);
-        text("Cap = ?", startX, startY + lineHeight * 3);
-    }
-    
-    // Remettre l'alignement au centre pour le reste du dessin
-    textAlign(CENTER, CENTER);
-}
+        function drawAnswers() {
+            textSize(20 / scaleFactor);
+            fill(255, 8, 8);
+            
+            let startX = 650;
+            let startY = 450;
+            let lineHeight = 30;
+            
+            // Alignement à gauche
+            textAlign(LEFT, CENTER);
+            
+            if (reponse) {
+                text("GT = " + Math.round(gisement) + "°", startX, startY);
+                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
+                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
+                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
+            } else {
+                text("GT = ?", startX, startY);
+                text("QDM = ?", startX, startY + lineHeight);
+                text("QDR = ?", startX, startY + lineHeight * 2);
+                text("Cap = ?", startX, startY + lineHeight * 3);
+            }
+            
+            // Remettre l'alignement au centre pour le reste du dessin
+            textAlign(CENTER, CENTER);
+        }
 
         function updateRotations() {
             // Conditions de rotation
@@ -358,21 +476,31 @@
         }
 
         function mousePressed() {
+            // Appliquer l'échelle inverse pour les coordonnées de la souris
+            const scaledX = mouseX / scaleFactor;
+            const scaledY = mouseY / scaleFactor;
+            
             // Bouton CAP
-            if (mouseX > 229 && mouseX < 307 && mouseY > 587 && mouseY < 614) {
+            if (scaledX > 229 && scaledX < 307 && scaledY > 587 && scaledY < 614) {
                 cap = (cap + 1) % 360;
             }
             
             // Bouton QDM
-            if (mouseX > 229 && mouseX < 307 && mouseY > 550 && mouseY < 575) {
+            if (scaledX > 229 && scaledX < 307 && scaledY > 550 && scaledY < 575) {
                 GT = (GT - 1) % 360;
                 if (GT > -1) GT = -359;
             }
             
             // Alignement rose avec cap (centre du RBI)
-            if (mouseX > 408 && mouseX < 508 && mouseY > 404 && mouseY < 504) {
+            if (scaledX > 408 && scaledX < 508 && scaledY > 404 && scaledY < 504) {
                 rose = cap;
             }
+        }
+
+        function touchStarted() {
+            // Gérer les touches tactiles
+            mousePressed();
+            return false; // Empêcher le comportement par défaut
         }
 
         function keyPressed() {
