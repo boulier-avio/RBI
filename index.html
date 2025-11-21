@@ -8,6 +8,7 @@
     <style>
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -19,6 +20,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            touch-action: manipulation;
         }
         
         h1 {
@@ -72,9 +74,10 @@
             flex: 1;
             min-width: 140px;
             max-width: 200px;
+            touch-action: manipulation;
         }
         
-        button:hover {
+        button:hover, button:active {
             background-color: #45a049;
         }
         
@@ -83,6 +86,7 @@
             max-width: 100%;
             height: auto;
             overflow: hidden;
+            touch-action: none;
         }
         
         /* Styles pour mobile en portrait */
@@ -166,10 +170,10 @@
         </div>
         
         <div class="controls">
-            <button onclick="randomQDR()">QDR Aléatoire (1)</button>
-            <button onclick="randomCap()">Cap Aléatoire (2)</button>
-            <button onclick="randomBoth()">Les deux (3)</button>
-            <button onclick="toggleReponse()">Afficher/Masquer Réponse</button>
+            <button id="randomQDRBtn">QDR Aléatoire (1)</button>
+            <button id="randomCapBtn">Cap Aléatoire (2)</button>
+            <button id="randomBothBtn">Les deux (3)</button>
+            <button id="toggleReponseBtn">Afficher/Masquer Réponse</button>
         </div>
         
         <div id="rbiCanvas"></div>
@@ -220,18 +224,47 @@
             
             // Initialisation des polices
             textFont('Arial');
+            
+            // Configuration des événements pour les boutons
+            setupButtonEvents();
+        }
+
+        function setupButtonEvents() {
+            // Utiliser des événements click plutôt que onclick pour mieux fonctionner sur mobile
+            document.getElementById('randomQDRBtn').addEventListener('click', randomQDR);
+            document.getElementById('randomCapBtn').addEventListener('click', randomCap);
+            document.getElementById('randomBothBtn').addEventListener('click', randomBoth);
+            document.getElementById('toggleReponseBtn').addEventListener('click', toggleReponse);
+            
+            // Événements tactiles supplémentaires
+            document.getElementById('randomQDRBtn').addEventListener('touchend', function(e) {
+                e.preventDefault();
+                randomQDR();
+            });
+            document.getElementById('randomCapBtn').addEventListener('touchend', function(e) {
+                e.preventDefault();
+                randomCap();
+            });
+            document.getElementById('randomBothBtn').addEventListener('touchend', function(e) {
+                e.preventDefault();
+                randomBoth();
+            });
+            document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {
+                e.preventDefault();
+                toggleReponse();
+            });
         }
 
         function calculateCanvasSize() {
             const container = document.getElementById('rbiCanvas').parentElement;
-            const maxWidth = container.clientWidth;
-            const maxHeight = window.innerHeight * 0.6; // 60% de la hauteur de la fenêtre
+            const maxWidth = Math.min(container.clientWidth, window.innerWidth - 20);
+            const maxHeight = window.innerHeight * 0.5; // 50% de la hauteur de la fenêtre pour laisser de la place aux boutons
             
             // Calcul du facteur d'échelle
             const widthRatio = maxWidth / baseWidth;
             const heightRatio = maxHeight / baseHeight;
             
-            scaleFactor = Math.min(widthRatio, heightRatio, 1); // Ne pas agrandir au-delà de la taille originale
+            scaleFactor = Math.min(widthRatio, heightRatio);
             
             canvasWidth = baseWidth * scaleFactor;
             canvasHeight = baseHeight * scaleFactor;
@@ -247,6 +280,9 @@
         }
 
         function RBI() {
+            // Réinitialiser la transformation
+            resetMatrix();
+            
             // Appliquer le facteur d'échelle
             scale(scaleFactor);
             
@@ -268,7 +304,7 @@
             }
 
             // Grille de référence
-            strokeWeight(2 / scaleFactor);
+            strokeWeight(Math.max(2 / scaleFactor, 1));
             stroke(0);
             line(NDBX - 100, NDBY, NDBX + 100, NDBY);
             line(NDBX, NDBY - 100, NDBX, NDBY + 100);
@@ -328,7 +364,7 @@
             // Triangle de cap
             drawCapTriangle();
             
-            // Réponses alignées
+            // Réponses alignées - adaptées pour mobile
             drawAnswers();
             
             // Conditions de rotation
@@ -338,7 +374,7 @@
         function drawRBIFrame() {
             fill(200);
             stroke(0);
-            strokeWeight(3 / scaleFactor);
+            strokeWeight(Math.max(3 / scaleFactor, 1));
             ellipse(268, 264, 536, 536);
             
             // Marques de degrés
@@ -349,18 +385,18 @@
                 translate(268, 264);
                 rotate(radians(i * 10));
                 if (i % 3 === 0) {
-                    textSize(16 / scaleFactor);
+                    textSize(Math.max(16 / scaleFactor, 12));
                     let angle = (360 - (i * 10)) % 360;
                     push();
                     rotate(radians(-i * 10));
                     text(angle, 0, -230);
                     pop();
                     stroke(0);
-                    strokeWeight(3 / scaleFactor);
+                    strokeWeight(Math.max(3 / scaleFactor, 1));
                     line(0, -250, 0, -268);
                 } else {
                     stroke(0);
-                    strokeWeight(1 / scaleFactor);
+                    strokeWeight(Math.max(1 / scaleFactor, 0.5));
                     line(0, -260, 0, -268);
                 }
                 pop();
@@ -370,10 +406,10 @@
         function drawNDB(x, y) {
             fill(255, 0, 0);
             stroke(0);
-            strokeWeight(2 / scaleFactor);
+            strokeWeight(Math.max(2 / scaleFactor, 1));
             ellipse(x, y, 80, 80);
             fill(255);
-            textSize(14 / scaleFactor);
+            textSize(Math.max(14 / scaleFactor, 10));
             text("NDB", x, y);
         }
 
@@ -387,7 +423,7 @@
         function drawRose() {
             fill(240);
             stroke(0);
-            strokeWeight(2 / scaleFactor);
+            strokeWeight(Math.max(2 / scaleFactor, 1));
             ellipse(0, 0, 500, 500);
             
             // Marques de la rose
@@ -398,11 +434,11 @@
                 rotate(radians(i * 10));
                 if (i % 3 === 0) {
                     stroke(0);
-                    strokeWeight(2 / scaleFactor);
+                    strokeWeight(Math.max(2 / scaleFactor, 1));
                     line(0, -230, 0, -250);
                 } else {
                     stroke(0);
-                    strokeWeight(1 / scaleFactor);
+                    strokeWeight(Math.max(1 / scaleFactor, 0.5));
                     line(0, -240, 0, -250);
                 }
                 pop();
@@ -430,12 +466,21 @@
         }
 
         function drawAnswers() {
-            textSize(20 / scaleFactor);
+            // Taille de texte adaptative pour mobile
+            const textSizeValue = Math.max(20 / scaleFactor, 14);
+            textSize(textSizeValue);
             fill(255, 8, 8);
             
-            let startX = 650;
+            // Position adaptative pour mobile
+            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
             let startY = 450;
-            let lineHeight = 30;
+            let lineHeight = 30 * (scaleFactor < 0.7 ? 0.8 : 1);
+            
+            // Ajustement supplémentaire pour très petits écrans
+            if (scaleFactor < 0.5) {
+                startX = 600;
+                lineHeight = 25;
+            }
             
             // Alignement à gauche
             textAlign(LEFT, CENTER);
@@ -483,24 +528,27 @@
             // Bouton CAP
             if (scaledX > 229 && scaledX < 307 && scaledY > 587 && scaledY < 614) {
                 cap = (cap + 1) % 360;
+                return false; // Empêcher la propagation
             }
             
             // Bouton QDM
             if (scaledX > 229 && scaledX < 307 && scaledY > 550 && scaledY < 575) {
                 GT = (GT - 1) % 360;
                 if (GT > -1) GT = -359;
+                return false; // Empêcher la propagation
             }
             
             // Alignement rose avec cap (centre du RBI)
             if (scaledX > 408 && scaledX < 508 && scaledY > 404 && scaledY < 504) {
                 rose = cap;
+                return false; // Empêcher la propagation
             }
         }
 
         function touchStarted() {
             // Gérer les touches tactiles
-            mousePressed();
-            return false; // Empêcher le comportement par défaut
+            const result = mousePressed();
+            return result === false ? false : true;
         }
 
         function keyPressed() {
