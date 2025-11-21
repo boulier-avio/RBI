@@ -209,11 +209,8 @@
             // Triangle de cap
             drawCapTriangle();
             
-            // Réponses
+            // Réponses alignées
             drawAnswers();
-            
-            // Bouton réponse
-            drawReponseButton();
             
             // Conditions de rotation
             updateRotations();
@@ -318,31 +315,21 @@
             textSize(20);
             fill(255, 8, 8);
             
+            let startX = 700;
+            let startY = 450;
+            let lineHeight = 30;
+            
             if (reponse) {
-                text("GT = " + Math.round(gisement) + "°", 750, 428);
-                text("QDM = " + Math.round(QDMvrai) + "°", 730, 453);
-                text("QDR = " + Math.round(QDRvrai) + "°", 710, 478);
-                text("Cap = " + Math.round(cap) + "°", 690, 503);
+                text("GT = " + Math.round(gisement) + "°", startX, startY);
+                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
+                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
+                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
             } else {
-                text("GT = ?", 750, 428);
-                text("QDM = ?", 730, 453);
-                text("QDR = ?", 710, 478);
-                text("Cap = ?", 690, 503);
+                text("GT = ?", startX, startY);
+                text("QDM = ?", startX, startY + lineHeight);
+                text("QDR = ?", startX, startY + lineHeight * 2);
+                text("Cap = ?", startX, startY + lineHeight * 3);
             }
-        }
-
-        function drawReponseButton() {
-            if (mouseX > 740 && mouseX < 820 && mouseY > 560 && mouseY < 590) {
-                fill(200);
-            } else {
-                fill(150);
-            }
-            stroke(0);
-            strokeWeight(1);
-            rect(780, 575, 80, 30, 5);
-            fill(0);
-            textSize(14);
-            text("Réponse", 780, 575);
         }
 
         function updateRotations() {
@@ -374,11 +361,6 @@
             if (mouseX > 229 && mouseX < 307 && mouseY > 550 && mouseY < 575) {
                 GT = (GT - 1) % 360;
                 if (GT > -1) GT = -359;
-            }
-            
-            // Bouton réponse
-            if (mouseX > 740 && mouseX < 820 && mouseY > 560 && mouseY < 590) {
-                reponse = !reponse;
             }
             
             // Alignement rose avec cap (centre du RBI)
