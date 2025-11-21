@@ -167,19 +167,21 @@
                 drawNDB(NDBX, NDBY);
             }
 
-            // Avion qui tourne autour de la balise
-            push();
-            translate(776, 264);
-            rotate(radians(-GT1 - 180));
-            translate(0, -100);
-            rotate(radians(heading));
-            rotate(radians(cap));
-            if (imgPlane) {
-                image(imgPlane, 0, 0);
-            } else {
-                drawPlane();
+            // Avion qui tourne autour de la balise (affiché seulement quand les réponses sont visibles)
+            if (reponse) {
+                push();
+                translate(776, 264);
+                rotate(radians(-GT1 - 180));
+                translate(0, -100);
+                rotate(radians(heading));
+                rotate(radians(cap));
+                if (imgPlane) {
+                    image(imgPlane, 0, 0);
+                } else {
+                    drawPlane();
+                }
+                pop();
             }
-            pop();
 
             // Rose de cap
             push();
@@ -222,14 +224,9 @@
             // Bouton réponse
             drawReponseButton();
             
-            // Instructions
-            drawInstructions();
-            
             // Conditions de rotation
             updateRotations();
             
-            // Signature
-            drawSignature();
         }
 
         function drawRBIFrame() {
@@ -360,21 +357,7 @@
             text("Réponse", 780, 575);
         }
 
-        function drawInstructions() {
-            textSize(12);
-            fill(0);
-            text("Touche 1 = QDR aléatoire", 50, 610);
-            text("Touche 2 = cap aléatoire", 50, 625);
-            text("Touche 3 = cap+QDR aléatoire", 50, 640);
-            text("Clic sur CAP/QDR pour ajuster", 50, 655);
-        }
-
-        function drawSignature() {
-            textSize(12);
-            fill(0);
-            text("Boulier", 870, 640);
-        }
-
+        
         function updateRotations() {
             // Conditions de rotation
             if (rose > 360 || rose < 0) rose = 0;
