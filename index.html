@@ -206,8 +206,7 @@
                 drawAvionCentral();
             }
 
-            // Affichage des valeurs
-            drawValues();
+          
             
             // Triangle de cap
             drawCapTriangle();
@@ -311,12 +310,7 @@
             triangle(-8, -8, 8, -8, 0, -20);
         }
 
-        function drawValues() {
-            fill(0);
-            textSize(16);
-            text("QDR: " + Math.round(QDRvrai) + "°", 268, 554);
-            text("CAP: " + Math.round(cap) + "°", 268, 584);
-        }
+        
 
         function drawCapTriangle() {
             noStroke();
