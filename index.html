@@ -311,26 +311,32 @@
             triangle(253, 39, 288, 39, 271, 109);
         }
 
-        function drawAnswers() {
-            textSize(20);
-            fill(255, 8, 8);
-            
-            let startX = 700;
-            let startY = 450;
-            let lineHeight = 30;
-            
-            if (reponse) {
-                text("GT = " + Math.round(gisement) + "°", startX, startY);
-                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
-                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
-                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
-            } else {
-                text("GT = ?", startX, startY);
-                text("QDM = ?", startX, startY + lineHeight);
-                text("QDR = ?", startX, startY + lineHeight * 2);
-                text("Cap = ?", startX, startY + lineHeight * 3);
-            }
-        }
+       function drawAnswers() {
+    textSize(20);
+    fill(255, 8, 8);
+    
+    let startX = 650;  // Position X plus à gauche
+    let startY = 450;
+    let lineHeight = 30;
+    
+    // Alignement à gauche
+    textAlign(LEFT, CENTER);
+    
+    if (reponse) {
+        text("GT = " + Math.round(gisement) + "°", startX, startY);
+        text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
+        text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
+        text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
+    } else {
+        text("GT = ?", startX, startY);
+        text("QDM = ?", startX, startY + lineHeight);
+        text("QDR = ?", startX, startY + lineHeight * 2);
+        text("Cap = ?", startX, startY + lineHeight * 3);
+    }
+    
+    // Remettre l'alignement au centre pour le reste du dessin
+    textAlign(CENTER, CENTER);
+}
 
         function updateRotations() {
             // Conditions de rotation
