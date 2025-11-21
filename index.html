@@ -57,37 +57,32 @@
         button:hover {
             background-color: #45a049;
         }
-        
-        .values {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Radio Bear Indicator (RBI)</h1>
         <div class="instructions">
-            <p><strong>Exercice de compréhension du système VOR et ADF</strong><br>
-            Lycée professionnel Roger Claustre - Renaud Boulier</p>
+           Lycée professionnel Roger Claustre - renaud.boulier@ac-clermont.fr</p>
         </div>
         
         <div class="controls">
             <button onclick="randomQDR()">QDR Aléatoire (1)</button>
             <button onclick="randomCap()">Cap Aléatoire (2)</button>
-            <button onclick="randomBoth()">Les Deux (3)</button>
+            <button onclick="randomBoth()">Les deux (3)</button>
             <button onclick="toggleReponse()">Afficher/Masquer Réponse</button>
-            <div class="values" id="currentValues">CAP: 0° | QDR: 180°</div>
         </div>
         
         <div id="rbiCanvas"></div>
         
         <div class="instructions">
-            <h3>Instructions :</h3>
-            <p><strong>Clic sur les valeurs CAP/QDR</strong> pour les ajuster<br>
-            <strong>Touches 1, 2, 3</strong> pour les positions aléatoires<br>
-            <strong>Clic au centre du RBI</strong> pour aligner la rose avec le cap</p>
+            <p>
+    Clique sur le bouton <strong>QDR aléatoires</strong> ou la touche 1 pour faire bouger l’avion autour de la balise.<br>
+    Clique sur le bouton <strong>CAP aléatoires</strong> ou la touche 2 pour faire changer le cap de l’avion.<br>
+    Clique sur le bouton <strong>Les deux</strong> ou la touche 3 pour faire changer le cap et la position de l’avion autour de la balise.<br>
+    Clique sur le bouton <strong>HDG</strong> du RBI afin qu’il affiche le cap en haut.
+</p>
+
         </div>
     </div>
 
@@ -133,7 +128,6 @@
 
         function draw() {
             RBI();
-            updateDisplay();
         }
 
         function RBI() {
@@ -375,11 +369,6 @@
             if (gisement < 0) {
                 gisement += 360;
             }
-        }
-
-        function updateDisplay() {
-            document.getElementById('currentValues').textContent = 
-                `CAP: ${Math.round(cap)}° | QDR: ${Math.round(QDRvrai)}°`;
         }
 
         function mousePressed() {
