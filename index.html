@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radio Bear Indicator (RBI)</title>
+    <title> ADF sur RBI - Radio Bear Indicator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
     <style>
         body {
@@ -19,340 +19,435 @@
         h1 {
             color: #333;
             margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+            text-align: center;
         }
         
         .controls {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
         
         button {
             padding: 10px 20px;
-            margin: 0 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
         }
         
         button:hover {
             background-color: #45a049;
         }
         
-        .instructions {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 10px;
-            max-width: 600px;
-        }
-        
-        .instructions h3 {
+        .values {
+            font-size: 16px;
+            font-weight: bold;
             color: #333;
-            margin-top: 0;
-        }
-        
-        .instructions ul {
-            text-align: left;
         }
     </style>
 </head>
 <body>
-    <h1>Radio Bear Indicator (RBI)</h1>
-    
-    <div class="controls">
-        <button onclick="toggleRBI()">Activer/Désactiver RBI</button>
-        <button onclick="resetRBI()">Réinitialiser</button>
-        <span style="margin-left: 20px; font-weight: bold;">HDG: <span id="hdgValue">0°</span></span>
-    </div>
-    
-    <div id="rbiCanvas"></div>
-    
-    <div class="instructions">
-        <h3>Instructions d'utilisation :</h3>
-        <ul>
-            <li><strong>Boutons Gauche/Droit</strong> : Ajuster le cap (HDG)</li>
-            <li><strong>Flèches du clavier</strong> : ← et → pour ajuster le cap</li>
-            <li><strong>Touche R</strong> : Activer/désactiver le RBI</li>
-            <li>Les valeurs QDR et QDM sont simulées automatiquement</li>
-        </ul>
+    <div class="container">
+        <h1>Radio Bear Indicator (RBI)</h1>
+        <div class="instructions">
+            <p><strong>Exercice de compréhension du système VOR et ADF</strong><br>
+            Lycée professionnel Roger Claustre - Renaud Boulier</p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="randomQDR()">QDR Aléatoire (1)</button>
+            <button onclick="randomCap()">Cap Aléatoire (2)</button>
+            <button onclick="randomBoth()">Les Deux (3)</button>
+            <button onclick="toggleReponse()">Afficher/Masquer Réponse</button>
+            <div class="values" id="currentValues">CAP: 0° | QDR: 180°</div>
+        </div>
+        
+        <div id="rbiCanvas"></div>
+        
+        <div class="instructions">
+            <h3>Instructions :</h3>
+            <p><strong>Clic sur les valeurs CAP/QDR</strong> pour les ajuster<br>
+            <strong>Touches 1, 2, 3</strong> pour les positions aléatoires<br>
+            <strong>Clic au centre du RBI</strong> pour aligner la rose avec le cap</p>
+        </div>
     </div>
 
     <script>
-        // Variables globales pour RBI
-        let imgRBICadre, imgRBIRose, imgRBIFleche;
-        let imgVOR2, imgADF1, imgADF2, imgADF3;
-        let imgVORBalise, imgNDB;
-
-        // Variables de valeurs pour RBI
-        let capRBI, headingRBI, gisementRBI, roseRBI;
-        let HDG_RBI = 0;
-        let QDR_RBI, QDM_RBI;
-        let rotRBI;
-        let GT_RBI;
-        let DME_RBI;
-
-        // Variables booléennes pour RBI
-        let boutonG_RBI = false;
-        let boutonD_RBI = false;
-        let RBI = true;
-
+        // Variables globales
+        let imgRBIcadre, imgAvion, imgPlane, imgRBIRose, imgRBIFleche, imgNDB;
+        
+        // Variables de valeurs
+        let cap = 0;
+        let heading = 0;
+        let gisement = 0;
+        let rose = 0;
+        let HDG = 0;
+        let QDRvrai = 180;
+        let QDMvrai = 0;
+        let GT = -180;
+        let rot = 180;
+        
+        // Variables booléennes
+        let reponse = false;
+        
         function preload() {
-            // Remplacez ces URLs par les chemins de vos images
-            imgRBICadre = loadImage("https://via.placeholder.com/400x400/333333/FFFFFF?text=RBI+Cadre");
-            imgRBIRose = loadImage("https://via.placeholder.com/350x350/555555/FFFFFF?text=RBI+Rose");
-            imgRBIFleche = loadImage("https://via.placeholder.com/50x200/FF0000/FFFFFF?text=Fleche");
-            imgVOR2 = loadImage("https://via.placeholder.com/80x80/0000FF/FFFFFF?text=VOR");
-            imgADF1 = loadImage("https://via.placeholder.com/80x80/00FF00/FFFFFF?text=ADF");
-            
-            // Images de secours si les principales ne sont pas disponibles
-            imgVORBalise = loadImage("https://via.placeholder.com/60x60/0000FF/FFFFFF?text=VOR");
-            imgNDB = loadImage("https://via.placeholder.com/60x60/FF0000/FFFFFF?text=NDB");
+            // Chargement des images - Remplacez par vos propres images
+            imgRBIcadre = loadImage('https://via.placeholder.com/536x536/333333/FFFFFF?text=RBI+CADRE');
+            imgRBIRose = loadImage('https://via.placeholder.com/500x500/555555/FFFFFF?text=ROSE+RBI');
+            imgRBIFleche = loadImage('https://via.placeholder.com/50x200/FF0000/FFFFFF?text=FLECHE');
+            imgPlane = loadImage('https://via.placeholder.com/100x100/00FF00/FFFFFF?text=AVION');
+            imgAvion = loadImage('https://via.placeholder.com/80x80/0000FF/FFFFFF?text=AVION+CENTRE');
+            imgNDB = loadImage('https://via.placeholder.com/120x120/FF0000/FFFFFF?text=NDB');
         }
 
         function setup() {
-            let canvas = createCanvas(600, 500);
+            let canvas = createCanvas(1200, 700);
             canvas.parent('rbiCanvas');
-            
-            // Initialisation des variables RBI
-            roseRBI = 0;
-            capRBI = 0;
             
             imageMode(CENTER);
             rectMode(CENTER);
             textAlign(CENTER, CENTER);
             
-            // Initialiser des valeurs par défaut
-            QDR_RBI = 45;
-            QDM_RBI = 225;
-            DME_RBI = 25;
+            // Initialisation des polices
+            textFont('Arial');
         }
 
         function draw() {
-            background(220);
-            
-            if (RBI) {
-                afficherRBI();
-            } else {
-                afficherMessageDesactive();
-            }
-            
-            // Mettre à jour l'affichage HDG
-            document.getElementById('hdgValue').textContent = HDG_RBI + '°';
+            RBI();
+            updateDisplay();
         }
 
-        function afficherRBI() {
-            // Fond du RBI
-            fill(50);
-            stroke(0);
+        function RBI() {
+            let NDBX = 776;
+            let NDBY = 264;
+            let GT1 = map(GT, 0, -359, 0, 359);
+            QDMvrai = map(GT1, 0, 359, 359, 0);
+            heading = GT1 - 180;
+            QDRvrai = QDMvrai + rot;
+
+            // Fond blanc
+            background(255);
+            
+            // Cadre du RBI
+            if (imgRBIcadre) {
+                image(imgRBIcadre, 268, 264);
+            } else {
+                drawRBIFrame();
+            }
+
+            // Grille de référence
             strokeWeight(2);
-            ellipse(width/2, height/2, 400, 400);
+            stroke(0);
+            line(NDBX - 100, NDBY, NDBX + 100, NDBY);
+            line(NDBX, NDBY - 100, NDBX, NDBY + 100);
             
-            // Rose des directions
+            // Balise NDB
+            if (imgNDB) {
+                image(imgNDB, NDBX, NDBY);
+            } else {
+                drawNDB(NDBX, NDBY);
+            }
+
+            // Avion qui tourne autour de la balise
             push();
-            translate(width/2, height/2);
-            rotate(radians(roseRBI));
+            translate(776, 264);
+            rotate(radians(-GT1 - 180));
+            translate(0, -100);
+            rotate(radians(heading));
+            rotate(radians(cap));
+            if (imgPlane) {
+                image(imgPlane, 0, 0);
+            } else {
+                drawPlane();
+            }
+            pop();
+
+            // Rose de cap
+            push();
+            translate(268, 264);
+            rotate(radians(-rose + 2));
+            if (imgRBIRose) {
+                image(imgRBIRose, 0, 0);
+            } else {
+                drawRose();
+            }
+            pop();
+
+            // Flèche
+            push();
+            translate(268, 264);
+            rotate(radians(-GT1 - cap));
+            if (imgRBIFleche) {
+                image(imgRBIFleche, 0, 0);
+            } else {
+                drawFleche();
+            }
+            pop();
+
+            // Avion central fixe
+            if (imgAvion) {
+                image(imgAvion, 269, 264);
+            } else {
+                drawAvionCentral();
+            }
+
+            // Affichage des valeurs
+            drawValues();
             
-            // Dessiner la rose (cercle avec marquages)
+            // Triangle de cap
+            drawCapTriangle();
+            
+            // Réponses
+            drawAnswers();
+            
+            // Bouton réponse
+            drawReponseButton();
+            
+            // Instructions
+            drawInstructions();
+            
+            // Conditions de rotation
+            updateRotations();
+            
+            // Signature
+            drawSignature();
+        }
+
+        function drawRBIFrame() {
             fill(200);
             stroke(0);
-            strokeWeight(1);
-            ellipse(0, 0, 350, 350);
+            strokeWeight(3);
+            ellipse(268, 264, 536, 536);
             
-            // Marques de direction
+            // Marques de degrés
+            fill(0);
+            noStroke();
+            for (let i = 0; i < 36; i++) {
+                push();
+                translate(268, 264);
+                rotate(radians(i * 10));
+                if (i % 3 === 0) {
+                    textSize(16);
+                    let angle = (360 - (i * 10)) % 360;
+                    push();
+                    rotate(radians(-i * 10));
+                    text(angle, 0, -230);
+                    pop();
+                    stroke(0);
+                    strokeWeight(3);
+                    line(0, -250, 0, -268);
+                } else {
+                    stroke(0);
+                    strokeWeight(1);
+                    line(0, -260, 0, -268);
+                }
+                pop();
+            }
+        }
+
+        function drawNDB(x, y) {
+            fill(255, 0, 0);
+            stroke(0);
+            strokeWeight(2);
+            ellipse(x, y, 80, 80);
+            fill(255);
+            textSize(14);
+            text("NDB", x, y);
+        }
+
+        function drawPlane() {
+            fill(0, 150, 0);
+            triangle(-20, 0, 20, 0, 0, -40);
+            fill(255);
+            triangle(-10, -10, 10, -10, 0, -30);
+        }
+
+        function drawRose() {
+            fill(240);
+            stroke(0);
+            strokeWeight(2);
+            ellipse(0, 0, 500, 500);
+            
+            // Marques de la rose
             fill(0);
             noStroke();
             for (let i = 0; i < 36; i++) {
                 push();
                 rotate(radians(i * 10));
                 if (i % 3 === 0) {
-                    // Grands traits (30°)
-                    rect(0, -160, 4, 20);
-                    let angle = (360 - (i * 10)) % 360;
-                    push();
-                    rotate(radians(-i * 10));
-                    textSize(14);
-                    text(angle, 0, -130);
-                    pop();
-                } else if (i % 1 === 0) {
-                    // Petits traits (10°)
-                    rect(0, -170, 2, 10);
+                    stroke(0);
+                    strokeWeight(2);
+                    line(0, -230, 0, -250);
+                } else {
+                    stroke(0);
+                    strokeWeight(1);
+                    line(0, -240, 0, -250);
                 }
                 pop();
             }
-            pop();
-            
-            // Flèche de cap
-            push();
-            translate(width/2, height/2);
-            rotate(radians(capRBI));
+        }
+
+        function drawFleche() {
             fill(255, 0, 0);
             noStroke();
-            triangle(0, -180, -10, -160, 10, -160);
-            pop();
-            
-            // Indicateurs VOR/ADF
+            triangle(-10, -250, 10, -250, 0, -200);
+            rect(-5, -150, 10, 100);
+        }
+
+        function drawAvionCentral() {
             fill(0, 0, 255);
-            ellipse(width/2 - 100, height/2 - 100, 60, 60);
-            fill(255, 0, 0);
-            ellipse(width/2 + 100, height/2 - 100, 60, 60);
-            
-            // Affichage des valeurs
+            triangle(-15, 0, 15, 0, 0, -30);
             fill(255);
+            triangle(-8, -8, 8, -8, 0, -20);
+        }
+
+        function drawValues() {
+            fill(0);
+            textSize(16);
+            text("QDR: " + Math.round(QDRvrai) + "°", 268, 554);
+            text("CAP: " + Math.round(cap) + "°", 268, 584);
+        }
+
+        function drawCapTriangle() {
+            noStroke();
+            fill(255, 255, 0, 185);
+            triangle(253, 39, 288, 39, 271, 109);
+        }
+
+        function drawAnswers() {
             textSize(20);
-            textStyle(BOLD);
+            fill(255, 8, 8);
             
-            // HDG au centre
-            fill(0);
-            textSize(24);
-            text("HDG: " + HDG_RBI + "°", width/2, height/2);
-            
-            // QDR et QDM
-            textSize(16);
-            text("QDR: " + (QDR_RBI ? QDR_RBI + "°" : "---"), width/2 - 80, height/2 + 180);
-            text("QDM: " + (QDM_RBI ? QDM_RBI + "°" : "---"), width/2 + 80, height/2 + 180);
-            text("DME: " + (DME_RBI ? DME_RBI + " NM" : "---"), width/2, height/2 + 210);
-            
-            // Boutons de contrôle
-            dessinerBoutonsRBI();
-            
-            // Aiguilles des indicateurs (simulées)
-            dessinerAiguilles();
+            if (reponse) {
+                text("GT = " + Math.round(gisement) + "°", 750, 428);
+                text("QDM = " + Math.round(QDMvrai) + "°", 730, 453);
+            } else {
+                text("GT = ?", 750, 428);
+                text("QDM = ?", 730, 453);
+            }
         }
 
-        function dessinerAiguilles() {
-            // Aiguille VOR (bleue)
-            push();
-            translate(width/2 - 100, height/2 - 100);
-            rotate(radians(QDR_RBI - HDG_RBI));
-            stroke(0, 0, 255);
-            strokeWeight(3);
-            line(0, 0, 0, -40);
-            pop();
-            
-            // Aiguille ADF (rouge)
-            push();
-            translate(width/2 + 100, height/2 - 100);
-            rotate(radians(QDM_RBI - HDG_RBI));
-            stroke(255, 0, 0);
-            strokeWeight(3);
-            line(0, 0, 0, -40);
-            pop();
-        }
-
-        function dessinerBoutonsRBI() {
-            // Bouton gauche
-            fill(boutonG_RBI ? color(100, 150, 255) : color(200));
+        function drawReponseButton() {
+            if (mouseX > 740 && mouseX < 820 && mouseY > 560 && mouseY < 590) {
+                fill(200);
+            } else {
+                fill(150);
+            }
             stroke(0);
             strokeWeight(1);
-            rect(width/2 - 60, height/2 + 250, 80, 30, 5);
+            rect(780, 575, 80, 30, 5);
             fill(0);
-            noStroke();
             textSize(14);
-            text("Gauche", width/2 - 60, height/2 + 250);
-            
-            // Bouton droit
-            fill(boutonD_RBI ? color(100, 150, 255) : color(200));
-            stroke(0);
-            strokeWeight(1);
-            rect(width/2 + 60, height/2 + 250, 80, 30, 5);
-            fill(0);
-            noStroke();
-            text("Droit", width/2 + 60, height/2 + 250);
+            text("Réponse", 780, 575);
         }
 
-        function afficherMessageDesactive() {
+        function drawInstructions() {
+            textSize(12);
             fill(0);
-            textSize(32);
-            text("RBI Désactivé", width/2, height/2);
-            textSize(16);
-            text("Appuyez sur 'R' ou le bouton pour activer", width/2, height/2 + 40);
+            text("Touche 1 = QDR aléatoire", 50, 610);
+            text("Touche 2 = cap aléatoire", 50, 625);
+            text("Touche 3 = cap+QDR aléatoire", 50, 640);
+            text("Clic sur CAP/QDR pour ajuster", 50, 655);
+        }
+
+        function drawSignature() {
+            textSize(12);
+            fill(0);
+            text("Boulier", 870, 640);
+        }
+
+        function updateRotations() {
+            // Conditions de rotation
+            if (rose > 360 || rose < 0) rose = 0;
+            if (gisement > 359 || gisement < 0) gisement = 0;
+            if (GT > -1 || GT < -360) GT = -359;
+            if (cap < 0 || cap > 359) cap = 0;
+            
+            if (QDMvrai < 180) {
+                rot = 180;
+            } else if (QDMvrai > 180) {
+                rot = -180;
+            }
+            
+            gisement = QDMvrai - cap;
+            if (gisement < 0) {
+                gisement += 360;
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentValues').textContent = 
+                `CAP: ${Math.round(cap)}° | QDR: ${Math.round(QDRvrai)}°`;
         }
 
         function mousePressed() {
-            // Gestion des clics pour RBI
-            if (RBI) {
-                gererClicsRBI();
-            }
-        }
-
-        function gererClicsRBI() {
-            // Vérifier les boutons de contrôle RBI
-            if (mouseX > width/2 - 100 && mouseX < width/2 - 20 && 
-                mouseY > height/2 + 235 && mouseY < height/2 + 265) {
-                boutonG_RBI = true;
-                // Logique pour diminuer le cap
-                HDG_RBI = (HDG_RBI - 1 + 360) % 360;
-                roseRBI = -HDG_RBI;
-                // Mettre à jour les valeurs simulées
-                QDR_RBI = (QDR_RBI + 1) % 360;
-                QDM_RBI = (QDM_RBI - 1 + 360) % 360;
+            // Bouton CAP
+            if (mouseX > 229 && mouseX < 307 && mouseY > 587 && mouseY < 614) {
+                cap = (cap + 1) % 360;
             }
             
-            if (mouseX > width/2 + 20 && mouseX < width/2 + 100 && 
-                mouseY > height/2 + 235 && mouseY < height/2 + 265) {
-                boutonD_RBI = true;
-                // Logique pour augmenter le cap
-                HDG_RBI = (HDG_RBI + 1) % 360;
-                roseRBI = -HDG_RBI;
-                // Mettre à jour les valeurs simulées
-                QDR_RBI = (QDR_RBI - 1 + 360) % 360;
-                QDM_RBI = (QDM_RBI + 1) % 360;
+            // Bouton QDM
+            if (mouseX > 229 && mouseX < 307 && mouseY > 550 && mouseY < 575) {
+                GT = (GT - 1) % 360;
+                if (GT > -1) GT = -359;
             }
-        }
-
-        function mouseReleased() {
-            // Réinitialiser les boutons RBI
-            boutonG_RBI = false;
-            boutonD_RBI = false;
+            
+            // Bouton réponse
+            if (mouseX > 740 && mouseX < 820 && mouseY > 560 && mouseY < 590) {
+                reponse = !reponse;
+            }
+            
+            // Alignement rose avec cap (centre du RBI)
+            if (mouseX > 408 && mouseX < 508 && mouseY > 404 && mouseY < 504) {
+                rose = cap;
+            }
         }
 
         function keyPressed() {
-            // Gestion des touches pour RBI
-            if (keyCode === LEFT_ARROW) {
-                HDG_RBI = (HDG_RBI - 1 + 360) % 360;
-                roseRBI = -HDG_RBI;
-                QDR_RBI = (QDR_RBI + 1) % 360;
-                QDM_RBI = (QDM_RBI - 1 + 360) % 360;
-            } else if (keyCode === RIGHT_ARROW) {
-                HDG_RBI = (HDG_RBI + 1) % 360;
-                roseRBI = -HDG_RBI;
-                QDR_RBI = (QDR_RBI - 1 + 360) % 360;
-                QDM_RBI = (QDM_RBI + 1) % 360;
-            }
-            
-            // Touche pour activer/désactiver RBI
-            if (key === 'r' || key === 'R') {
-                RBI = !RBI;
+            if (key === '1') {
+                randomQDR();
+            } else if (key === '2') {
+                randomCap();
+            } else if (key === '3') {
+                randomBoth();
             }
         }
 
-        // Fonctions pour l'interface HTML
-        function toggleRBI() {
-            RBI = !RBI;
+        // Fonctions pour l'interface
+        function randomQDR() {
+            GT = random(-360, 0);
         }
 
-        function resetRBI() {
-            HDG_RBI = 0;
-            roseRBI = 0;
-            capRBI = 0;
-            QDR_RBI = 45;
-            QDM_RBI = 225;
-            DME_RBI = 25;
+        function randomCap() {
+            cap = random(0, 359);
         }
 
-        // Fonction pour définir les valeurs du RBI
-        function setValeursRBI(hdg, qdr, qdm, dme) {
-            HDG_RBI = hdg;
-            QDR_RBI = qdr;
-            QDM_RBI = qdm;
-            DME_RBI = dme;
-            roseRBI = -hdg;
+        function randomBoth() {
+            cap = random(0, 359);
+            GT = random(-360, 0);
+        }
+
+        function toggleReponse() {
+            reponse = !reponse;
         }
     </script>
 </body>
