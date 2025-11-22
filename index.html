@@ -202,6 +202,9 @@
         let baseWidth = 1200;
         let baseHeight = 700;
 
+        // Détection mobile
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         function preload() {
             // Chargement des images - Remplacez par vos propres images
             imgRBIcadre = loadImage('RBIcadre.png');
@@ -465,40 +468,27 @@
         }
 
         function drawAnswers() {
-            // Détection du mode paysage mobile
-            const isMobileLandscape = window.innerWidth > window.innerHeight && window.innerWidth <= 900;
-            
-            // Taille de texte adaptative pour mobile - réduite en paysage
+            // Taille de texte différente selon le device
             let textSizeValue;
-            if (isMobileLandscape) {
-                textSizeValue = Math.max(16 / scaleFactor, 12); // Plus petite en paysage
+            if (isMobile) {
+                // Police réduite sur mobile
+                textSizeValue = Math.max(16 / scaleFactor, 12);
             } else {
+                // Taille normale sur desktop
                 textSizeValue = Math.max(20 / scaleFactor, 14);
             }
+            
             textSize(textSizeValue);
             fill(255, 8, 8);
             
-            // Position adaptative pour mobile
-            let startX, startY;
-            
-            if (isMobileLandscape) {
-                // En mode paysage, on met les réponses plus à droite
-                startX = 700 * (scaleFactor < 0.7 ? 0.95 : 1);
-                startY = 400; // Plus haut pour libérer de l'espace
-            } else {
-                // En mode portrait
-                startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-                startY = 450;
-            }
+            // Position adaptative
+            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
+            let startY = 450;
             
             // Ajustement dynamique de l'espacement entre les lignes
             let lineHeight;
-            if (isMobileLandscape) {
-                lineHeight = 25; // Plus compact en paysage
-            } else if (scaleFactor < 0.5) {
-                lineHeight = 28;
-            } else if (scaleFactor < 0.7) {
-                lineHeight = 26;
+            if (isMobile) {
+                lineHeight = 25; // Plus compact sur mobile
             } else {
                 lineHeight = 30;
             }
@@ -506,13 +496,7 @@
             // Ajustement supplémentaire pour très petits écrans
             if (scaleFactor < 0.5) {
                 startX = 600;
-                if (!isMobileLandscape) lineHeight = 28;
-            }
-            
-            // Ajustement pour mobiles en paysage très petits
-            if (isMobileLandscape && window.innerHeight < 400) {
-                lineHeight = 22;
-                startY = 380;
+                lineHeight = isMobile ? 22 : 28;
             }
             
             // Alignement à gauche
