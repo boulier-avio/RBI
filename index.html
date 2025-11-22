@@ -53,6 +53,36 @@
             font-size: clamp(0.9rem, 2vw, 1rem);
             line-height: 1.4;
         }
+        .consigne {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+            width: 95%;
+            max-width: 900px;
+        }
+        .consigne h3 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .consigne p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .astuce {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-style: italic;
+            font-size: 0.9em;
+        }
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -129,6 +159,10 @@
                 font-size: 1em;
                 text-align: center;
             }
+            .consigne {
+                padding: 12px;
+                margin: 8px 10px;
+            }
         }
         /* Aide modale */
         #helpModal {
@@ -180,12 +214,27 @@
 <body>
     <div class="container">
         <h1>Radio Bear Indicator (RBI)</h1>
+        
+        <div class="consigne">
+            <h3>📋 Consigne :</h3>
+            <p><strong>Détermine la position de l'avion, son cap, le gisement ainsi que les relèvements QDR et QDM à partir de l'instrument.</strong></p>
+            <p><strong>N'oublie pas d'appuyer sur le bouton HDG du RBI</strong>, car il n'est pas asservi : le pilote doit régler manuellement le cap affiché.</p>
+            
+            <div class="astuce">
+                <strong>Astuce :</strong><br>
+                • Quand la rose est calée sur le nord, la pointe de la flèche se lit directement.<br>
+                • Quand la rose est calée sur le cap, la pointe de la flèche indique le QDM et l'arrière de la flèche indique le QDR.
+            </div>
+        </div>
+        
         <div class="instructions">
             <p>
-                Clique sur le bouton <strong>QDR aléatoires</strong> ou la touche 1 pour faire bouger l'avion autour de la balise.<br>
-                Clique sur le bouton <strong>CAP aléatoires</strong> ou la touche 2 pour faire changer le cap de l'avion.<br>
-                Clique sur le bouton <strong>Les deux</strong> ou la touche 3 pour faire changer le cap et la position de l'avion autour de la balise.<br>
-                Clique sur le bouton <strong>HDG</strong> du RBI afin qu'il affiche le cap en haut.
+                Clique sur le bouton:<br>  
+                <strong>- QDR aléatoires</strong> pour faire bouger l'avion autour de la balise.<br>
+               <strong>- CAP aléatoires</strong>  pour faire changer le cap de l'avion.<br>
+              <strong>- Les deux</strong> pour faire changer le cap et la position de l'avion autour de la balise.<br>
+                Clique sur le bouton <strong>HDG</strong> du RBI afin qu'il affiche le cap en haut.<br>
+                
             </p>
         </div>
         <div class="controls">
@@ -210,8 +259,8 @@
                 <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
                     <li><strong>GT&nbsp;:</strong> <em>Gisement transmis</em> par le RBI, angle entre le nez de l'avion et la direction de la balise.</li>
                     <li><strong>QDM&nbsp;:</strong> Cap magnétique à suivre pour aller vers la balise depuis la position de l'avion.</li>
-                    <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s’éloigner de la balise.</li>
-                    <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l’avion par rapport au nord magnétique.</li>
+                    <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s'éloigner de la balise.</li>
+                    <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l'avion par rapport au nord magnétique.</li>
                 </ul>
             </div>
         </div>
