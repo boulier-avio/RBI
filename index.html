@@ -451,26 +451,19 @@
             triangle(253, 39, 288, 39, 271, 109);
         }
 
+        // Version simple : les réponses TOUJOURS à droite du RBI, y compris sur mobile
         function drawAnswers() {
             let textSizeValue = isMobile ? Math.max(16 / scaleFactor, 12) : Math.max(20 / scaleFactor, 14);
             textSize(textSizeValue);
             fill(255, 8, 8);
             let lineHeight = Math.round(textSizeValue * 1.7);
 
-            // Adaptatif : sous le RBI si trop étroit, à droite sinon
-            let useVertical = false;
-            if (window.innerWidth < 800 || isMobile || scaleFactor < 0.7) useVertical = true;
-            let startX, startY;
-            if (useVertical) {
-                startX = width / 2;
-                startY = height - (lineHeight * 4) - 10;
-                textAlign(CENTER, CENTER);
-            } else {
-                startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-                startY = 450;
-                if (scaleFactor < 0.5) startX = 600;
-                textAlign(LEFT, CENTER);
-            }
+            // Toujours à droite du RBI
+            let marginRight = isMobile ? 30 : 50; // marge ajustable
+            let startX = width - marginRight * (1 / scaleFactor);
+            let startY = 450 * scaleFactor;
+            if (scaleFactor < 0.7) startY = 350 * scaleFactor;
+            textAlign(LEFT, CENTER);
 
             if (reponse) {
                 text("GT = " + Math.round(gisement) + "°", startX, startY);
