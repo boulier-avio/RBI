@@ -96,9 +96,12 @@
             overflow: hidden;
             touch-action: none;
             box-sizing: border-box;
-            margin: 0;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
+
         /* Styles pour mobile en portrait */
         @media (max-width: 768px) and (orientation: portrait) {
             body {
@@ -219,7 +222,6 @@
         </div>
         
         <div id="rbiCanvas"></div>
-        <!-- ==== Explication contextuelle des termes ==== -->
         <div style="text-align:center; margin-top:10px;">
             <button id="showHelpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
         </div>
@@ -235,41 +237,22 @@
                 </ul>
             </div>
         </div>
-        <!-- ==== fin explications ==== -->
     </div>
      <div class="instructions">
             <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
         </div>
 
     <script>
-        // Variables globales
         let imgRBIcadre, imgAvion, imgPlane, imgRBIRose, imgRBIFleche, imgNDB;
-        
-        // Variables de valeurs
-        let cap = 0;
-        let heading = 0;
-        let gisement = 0;
-        let rose = 0;
-        let HDG = 0;
-        let QDRvrai = 180;
-        let QDMvrai = 0;
-        let GT = -180;
-        let rot = 180;
-        
-        // Variables booléennes
+        let cap = 0, heading = 0, gisement = 0, rose = 0, HDG = 0;
+        let QDRvrai = 180, QDMvrai = 0, GT = -180, rot = 180;
         let reponse = false;
-        
-        // Variables pour le responsive
-        let canvasWidth, canvasHeight;
-        let scaleFactor = 1;
+        let canvasWidth, canvasHeight, scaleFactor = 1;
         let baseWidth = 1200;
         let baseHeight = 700;
-
-        // Détection mobile
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         function preload() {
-            // Chargement des images - Remplacez par vos propres images
             imgRBIcadre = loadImage('RBIcadre.png');
             imgRBIRose = loadImage('RBIrose.png');
             imgRBIFleche = loadImage('RBIFleche.png');
@@ -282,51 +265,28 @@
             calculateCanvasSize();
             let canvas = createCanvas(canvasWidth, canvasHeight);
             canvas.parent('rbiCanvas');
-            
             imageMode(CENTER);
             rectMode(CENTER);
             textAlign(CENTER, CENTER);
-            
-            // Initialisation des polices
             textFont('Arial');
-            
-            // Configuration des événements pour les boutons
             setupButtonEvents();
         }
 
         function setupButtonEvents() {
-            // Utiliser des événements click plutôt que onclick pour mieux fonctionner sur mobile
             document.getElementById('randomQDRBtn').addEventListener('click', randomQDR);
             document.getElementById('randomCapBtn').addEventListener('click', randomCap);
             document.getElementById('randomBothBtn').addEventListener('click', randomBoth);
             document.getElementById('toggleReponseBtn').addEventListener('click', toggleReponse);
-            
-            // Événements tactiles supplémentaires
-            document.getElementById('randomQDRBtn').addEventListener('touchend', function(e) {
-                e.preventDefault();
-                randomQDR();
-            });
-            document.getElementById('randomCapBtn').addEventListener('touchend', function(e) {
-                e.preventDefault();
-                randomCap();
-            });
-            document.getElementById('randomBothBtn').addEventListener('touchend', function(e) {
-                e.preventDefault();
-                randomBoth();
-            });
-            document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {
-                e.preventDefault();
-                toggleReponse();
-            });
-
-            // Explication modale
+            document.getElementById('randomQDRBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomQDR();});
+            document.getElementById('randomCapBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomCap();});
+            document.getElementById('randomBothBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomBoth();});
+            document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {e.preventDefault(); toggleReponse();});
             document.getElementById('showHelpBtn').addEventListener('click', function() {
                 document.getElementById('helpModal').classList.add('active');
             });
             document.getElementById('closeHelpBtn').addEventListener('click', function() {
                 document.getElementById('helpModal').classList.remove('active');
             });
-            // Fermer aide en cliquant hors de la boîte
             document.getElementById('helpModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     this.classList.remove('active');
@@ -335,12 +295,11 @@
         }
 
         function calculateCanvasSize() {
-            // Utilise toute la largeur disponible
             const maxWidth = window.innerWidth;
-            const maxHeight = window.innerHeight * 0.6; // 60% de la hauteur de la fenêtre
+            const maxHeight = window.innerHeight * 0.6;
             const widthRatio = maxWidth / baseWidth;
             const heightRatio = maxHeight / baseHeight;
-            scaleFactor = Math.min(widthRatio, heightRatio);
+            scaleFactor = Math.min(widthRatio, heightRatio, 1); // never > 1
             canvasWidth = baseWidth * scaleFactor;
             canvasHeight = baseHeight * scaleFactor;
         }
@@ -357,32 +316,21 @@
         function RBI() {
             resetMatrix();
             scale(scaleFactor);
-            
+
             let NDBX = 776;
             let NDBY = 264;
             let GT1 = map(GT, 0, -359, 0, 359);
             QDMvrai = map(GT1, 0, 359, 359, 0);
             heading = GT1 - 180;
             QDRvrai = QDMvrai + rot;
-
             background(255);
 
-            if (imgRBIcadre) {
-                image(imgRBIcadre, 268, 264);
-            } else {
-                drawRBIFrame();
-            }
-
+            if (imgRBIcadre) image(imgRBIcadre, 268, 264); else drawRBIFrame();
             strokeWeight(Math.max(2 / scaleFactor, 1));
             stroke(0);
             line(NDBX - 100, NDBY, NDBX + 100, NDBY);
             line(NDBX, NDBY - 100, NDBX, NDBY + 100);
-
-            if (imgNDB) {
-                image(imgNDB, NDBX, NDBY);
-            } else {
-                drawNDB(NDBX, NDBY);
-            }
+            if (imgNDB) image(imgNDB, NDBX, NDBY); else drawNDB(NDBX, NDBY);
 
             if (reponse) {
                 push();
@@ -391,40 +339,23 @@
                 translate(0, -100);
                 rotate(radians(heading));
                 rotate(radians(cap));
-                if (imgPlane) {
-                    image(imgPlane, 0, 0);
-                } else {
-                    drawPlane();
-                }
+                if (imgPlane) image(imgPlane, 0, 0); else drawPlane();
                 pop();
             }
 
             push();
             translate(268, 264);
             rotate(radians(-rose + 2));
-            if (imgRBIRose) {
-                image(imgRBIRose, 0, 0);
-            } else {
-                drawRose();
-            }
+            if (imgRBIRose) image(imgRBIRose, 0, 0); else drawRose();
             pop();
 
             push();
             translate(268, 264);
             rotate(radians(-GT1 - cap));
-            if (imgRBIFleche) {
-                image(imgRBIFleche, 0, 0);
-            } else {
-                drawFleche();
-            }
+            if (imgRBIFleche) image(imgRBIFleche, 0, 0); else drawFleche();
             pop();
 
-            if (imgAvion) {
-                image(imgAvion, 269, 264);
-            } else {
-                drawAvionCentral();
-            }
-
+            if (imgAvion) image(imgAvion, 269, 264); else drawAvionCentral();
             drawCapTriangle();
             drawAnswers();
             updateRotations();
@@ -521,21 +452,25 @@
         }
 
         function drawAnswers() {
-            let textSizeValue;
-            if (isMobile) {
-                textSizeValue = Math.max(16 / scaleFactor, 12);
-            } else {
-                textSizeValue = Math.max(20 / scaleFactor, 14);
-            }
+            let textSizeValue = isMobile ? Math.max(16 / scaleFactor, 12) : Math.max(20 / scaleFactor, 14);
             textSize(textSizeValue);
             fill(255, 8, 8);
             let lineHeight = Math.round(textSizeValue * 1.7);
-            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-            let startY = 450;
-            if (scaleFactor < 0.5) {
-                startX = 600;
+
+            // Adaptatif : sous le RBI si trop étroit, à droite sinon
+            let useVertical = false;
+            if (window.innerWidth < 800 || isMobile || scaleFactor < 0.7) useVertical = true;
+            let startX, startY;
+            if (useVertical) {
+                startX = width / 2;
+                startY = height - (lineHeight * 4) - 10;
+                textAlign(CENTER, CENTER);
+            } else {
+                startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
+                startY = 450;
+                if (scaleFactor < 0.5) startX = 600;
+                textAlign(LEFT, CENTER);
             }
-            textAlign(LEFT, CENTER);
 
             if (reponse) {
                 text("GT = " + Math.round(gisement) + "°", startX, startY);
@@ -556,15 +491,9 @@
             if (gisement > 359 || gisement < 0) gisement = 0;
             if (GT > -1 || GT < -360) GT = -359;
             if (cap < 0 || cap > 359) cap = 0;
-            if (QDMvrai < 180) {
-                rot = 180;
-            } else if (QDMvrai > 180) {
-                rot = -180;
-            }
+            if (QDMvrai < 180) rot = 180; else if (QDMvrai > 180) rot = -180;
             gisement = QDMvrai - cap;
-            if (gisement < 0) {
-                gisement += 360;
-            }
+            if (gisement < 0) gisement += 360;
         }
 
         function mousePressed() {
@@ -591,13 +520,9 @@
         }
 
         function keyPressed() {
-            if (key === '1') {
-                randomQDR();
-            } else if (key === '2') {
-                randomCap();
-            } else if (key === '3') {
-                randomBoth();
-            }
+            if (key === '1') randomQDR();
+            else if (key === '2') randomCap();
+            else if (key === '3') randomBoth();
         }
 
         function randomQDR() {
