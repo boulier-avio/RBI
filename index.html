@@ -10,7 +10,6 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
         body {
             margin: 0;
             padding: 0;
@@ -22,14 +21,12 @@
             min-height: 100vh;
             touch-action: manipulation;
         }
-        
         h1 {
             color: #333;
             margin-bottom: 10px;
             text-align: center;
             font-size: clamp(1.5rem, 4vw, 2.5rem);
         }
-        
         .container {
             display: flex;
             flex-direction: column;
@@ -40,7 +37,6 @@
             box-sizing: border-box;
             padding: 0;
         }
-        
         .instructions {
             background-color: white;
             padding: 12px 0;
@@ -52,13 +48,11 @@
             text-align: center;
             margin: 0;
         }
-        
         .instructions p {
             margin: 8px 0;
             font-size: clamp(0.9rem, 2vw, 1rem);
             line-height: 1.4;
         }
-        
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -70,7 +64,6 @@
             box-sizing: border-box;
             margin: 0;
         }
-        
         button {
             padding: 12px 16px;
             background-color: #4CAF50;
@@ -84,74 +77,57 @@
             max-width: 200px;
             touch-action: manipulation;
         }
-        
         button:hover, button:active {
             background-color: #45a049;
         }
-        
-        #rbiCanvas {
+        .jeu-reponse-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
             width: 100vw;
             max-width: 100vw;
-            height: auto;
-            overflow: hidden;
-            touch-action: none;
             box-sizing: border-box;
+            gap: 20px;
             margin: 0 auto;
+        }
+        #rbiCanvas {
+            flex: 3 1 0%;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-width: 200px;
+            max-width: 800px;
         }
-
-        /* Styles pour mobile en portrait */
-        @media (max-width: 768px) and (orientation: portrait) {
-            body {
-                padding: 0;
-            }
-            .container {
-                gap: 10px;
-            }
-            .instructions {
-                padding: 10px 0;
-            }
-            .controls {
+        #reponsesBox {
+            flex: 1 1 0%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            padding: 18px 12px;
+            min-width: 150px;
+            max-width: 220px;
+            font-size: 1.05em;
+            color: #d63c3c;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 30px;
+        }
+        @media (max-width: 900px) {
+            .jeu-reponse-row {
+                flex-direction: column;
+                align-items: center;
                 gap: 8px;
             }
-            button {
-                min-width: 120px;
-                padding: 10px 12px;
-            }
-        }
-        
-        /* Styles pour mobile en paysage */
-        @media (max-width: 900px) and (orientation: landscape) {
-            .container {
-                gap: 8px;
-            }
-            .instructions {
-                padding: 8px 0;
-            }
-            .controls {
-                gap: 6px;
-            }
-            button {
-                min-width: 110px;
-                padding: 8px 10px;
-                font-size: 0.8rem;
-            }
-        }
-        
-        /* Très petits écrans */
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.3rem;
-            }
-            .instructions p {
-                font-size: 0.8rem;
-            }
-            button {
-                min-width: 100px;
-                padding: 8px 10px;
-                font-size: 0.75rem;
+            #reponsesBox {
+                margin-top: 8px;
+                align-items: center;
+                min-width: unset;
+                max-width: 95vw;
+                width: 95vw;
+                font-size: 1em;
+                text-align: center;
             }
         }
         /* Aide modale */
@@ -204,7 +180,6 @@
 <body>
     <div class="container">
         <h1>Radio Bear Indicator (RBI)</h1>
-        
         <div class="instructions">
             <p>
                 Clique sur le bouton <strong>QDR aléatoires</strong> ou la touche 1 pour faire bouger l'avion autour de la balise.<br>
@@ -213,15 +188,18 @@
                 Clique sur le bouton <strong>HDG</strong> du RBI afin qu'il affiche le cap en haut.
             </p>
         </div>
-        
         <div class="controls">
             <button id="randomQDRBtn">QDR Aléatoire (1)</button>
             <button id="randomCapBtn">Cap Aléatoire (2)</button>
             <button id="randomBothBtn">Les deux (3)</button>
             <button id="toggleReponseBtn">Afficher/Masquer Réponse</button>
         </div>
-        
-        <div id="rbiCanvas"></div>
+        <div class="jeu-reponse-row">
+            <div id="rbiCanvas"></div>
+            <div id="reponsesBox">
+                <!-- Les réponses s'affichent ici via JS -->
+            </div>
+        </div>
         <div style="text-align:center; margin-top:10px;">
             <button id="showHelpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
         </div>
@@ -238,10 +216,9 @@
             </div>
         </div>
     </div>
-     <div class="instructions">
-            <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
-        </div>
-
+    <div class="instructions">
+        <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
+    </div>
     <script>
         let imgRBIcadre, imgAvion, imgPlane, imgRBIRose, imgRBIFleche, imgNDB;
         let cap = 0, heading = 0, gisement = 0, rose = 0, HDG = 0;
@@ -295,11 +272,12 @@
         }
 
         function calculateCanvasSize() {
-            const maxWidth = window.innerWidth;
+            const maxWidth = 800; // Limite max visuelle sur desktop
+            const fullWidth = window.innerWidth > maxWidth ? maxWidth : window.innerWidth * .95;
             const maxHeight = window.innerHeight * 0.6;
-            const widthRatio = maxWidth / baseWidth;
+            const widthRatio = fullWidth / baseWidth;
             const heightRatio = maxHeight / baseHeight;
-            scaleFactor = Math.min(widthRatio, heightRatio, 1); // never > 1
+            scaleFactor = Math.min(widthRatio, heightRatio, 1);
             canvasWidth = baseWidth * scaleFactor;
             canvasHeight = baseHeight * scaleFactor;
         }
@@ -311,6 +289,7 @@
 
         function draw() {
             RBI();
+            drawAnswers();
         }
 
         function RBI() {
@@ -357,7 +336,6 @@
 
             if (imgAvion) image(imgAvion, 269, 264); else drawAvionCentral();
             drawCapTriangle();
-            drawAnswers();
             updateRotations();
         }
 
@@ -451,32 +429,18 @@
             triangle(253, 39, 288, 39, 271, 109);
         }
 
-        // Version simple : les réponses TOUJOURS à droite du RBI, y compris sur mobile
+        // Les réponses s'affichent dans la boîte externe à droite/sous le canvas
         function drawAnswers() {
-            let textSizeValue = isMobile ? Math.max(16 / scaleFactor, 12) : Math.max(20 / scaleFactor, 14);
-            textSize(textSizeValue);
-            fill(255, 8, 8);
-            let lineHeight = Math.round(textSizeValue * 1.7);
-
-            // Toujours à droite du RBI
-            let marginRight = isMobile ? 30 : 50; // marge ajustable
-            let startX = width - marginRight * (1 / scaleFactor);
-            let startY = 450 * scaleFactor;
-            if (scaleFactor < 0.7) startY = 350 * scaleFactor;
-            textAlign(LEFT, CENTER);
-
+            let txt = "";
             if (reponse) {
-                text("GT = " + Math.round(gisement) + "°", startX, startY);
-                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
-                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
-                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
+                txt += "GT = " + Math.round(gisement) + "°<br>";
+                txt += "QDM = " + Math.round(QDMvrai) + "°<br>";
+                txt += "QDR = " + Math.round(QDRvrai) + "°<br>";
+                txt += "Cap = " + Math.round(cap) + "°";
             } else {
-                text("GT = ?", startX, startY);
-                text("QDM = ?", startX, startY + lineHeight);
-                text("QDR = ?", startX, startY + lineHeight * 2);
-                text("Cap = ?", startX, startY + lineHeight * 3);
+                txt += "GT = ?<br>QDM = ?<br>QDR = ?<br>Cap = ?";
             }
-            textAlign(CENTER, CENTER);
+            document.getElementById('reponsesBox').innerHTML = txt;
         }
 
         function updateRotations() {
