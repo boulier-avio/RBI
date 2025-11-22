@@ -13,7 +13,7 @@
         
         body {
             margin: 0;
-            padding: 10px;
+            padding: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
             display: flex;
@@ -35,17 +35,22 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-           
-            max-width: 1200px;
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            padding: 0;
         }
         
         .instructions {
             background-color: white;
-            padding: 12px;
+            padding: 12px 0;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
             text-align: center;
+            margin: 0;
         }
         
         .instructions p {
@@ -60,7 +65,10 @@
             gap: 10px;
             justify-content: center;
             align-items: center;
-           
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            margin: 0;
         }
         
         button {
@@ -82,30 +90,29 @@
         }
         
         #rbiCanvas {
-            
+            width: 100vw;
+            max-width: 100vw;
             height: auto;
             overflow: hidden;
             touch-action: none;
+            box-sizing: border-box;
+            margin: 0;
         }
         
         /* Styles pour mobile en portrait */
         @media (max-width: 768px) and (orientation: portrait) {
             body {
-                padding: 5px;
+                padding: 0;
             }
-            
             .container {
                 gap: 10px;
             }
-            
             .instructions {
-                padding: 10px;
+                padding: 10px 0;
             }
-            
             .controls {
                 gap: 8px;
             }
-            
             button {
                 min-width: 120px;
                 padding: 10px 12px;
@@ -117,15 +124,12 @@
             .container {
                 gap: 8px;
             }
-            
             .instructions {
-                padding: 8px;
+                padding: 8px 0;
             }
-            
             .controls {
                 gap: 6px;
             }
-            
             button {
                 min-width: 110px;
                 padding: 8px 10px;
@@ -138,11 +142,9 @@
             h1 {
                 font-size: 1.3rem;
             }
-            
             .instructions p {
                 font-size: 0.8rem;
             }
-            
             button {
                 min-width: 100px;
                 padding: 8px 10px;
@@ -333,16 +335,12 @@
         }
 
         function calculateCanvasSize() {
-            const container = document.getElementById('rbiCanvas').parentElement;
-            const maxWidth = Math.min(container.clientWidth, window.innerWidth - 20);
-            const maxHeight = window.innerHeight * 0.6; // 50% de la hauteur de la fenêtre pour laisser de la place aux boutons
-            
-            // Calcul du facteur d'échelle
+            // Utilise toute la largeur disponible
+            const maxWidth = window.innerWidth;
+            const maxHeight = window.innerHeight * 0.6; // 60% de la hauteur de la fenêtre
             const widthRatio = maxWidth / baseWidth;
             const heightRatio = maxHeight / baseHeight;
-            
             scaleFactor = Math.min(widthRatio, heightRatio);
-            
             canvasWidth = baseWidth * scaleFactor;
             canvasHeight = baseHeight * scaleFactor;
         }
@@ -357,10 +355,7 @@
         }
 
         function RBI() {
-            // Réinitialiser la transformation
             resetMatrix();
-            
-            // Appliquer le facteur d'échelle
             scale(scaleFactor);
             
             let NDBX = 776;
@@ -370,30 +365,25 @@
             heading = GT1 - 180;
             QDRvrai = QDMvrai + rot;
 
-            // Fond blanc
             background(255);
-            
-            // Cadre du RBI
+
             if (imgRBIcadre) {
                 image(imgRBIcadre, 268, 264);
             } else {
                 drawRBIFrame();
             }
 
-            // Grille de référence
             strokeWeight(Math.max(2 / scaleFactor, 1));
             stroke(0);
             line(NDBX - 100, NDBY, NDBX + 100, NDBY);
             line(NDBX, NDBY - 100, NDBX, NDBY + 100);
-            
-            // Balise NDB
+
             if (imgNDB) {
                 image(imgNDB, NDBX, NDBY);
             } else {
                 drawNDB(NDBX, NDBY);
             }
 
-            // Avion qui tourne autour de la balise (affiché seulement quand les réponses sont visibles)
             if (reponse) {
                 push();
                 translate(776, 264);
@@ -409,7 +399,6 @@
                 pop();
             }
 
-            // Rose de cap
             push();
             translate(268, 264);
             rotate(radians(-rose + 2));
@@ -420,7 +409,6 @@
             }
             pop();
 
-            // Flèche
             push();
             translate(268, 264);
             rotate(radians(-GT1 - cap));
@@ -431,20 +419,14 @@
             }
             pop();
 
-            // Avion central fixe
             if (imgAvion) {
                 image(imgAvion, 269, 264);
             } else {
                 drawAvionCentral();
             }
 
-            // Triangle de cap
             drawCapTriangle();
-            
-            // Réponses alignées - adaptées pour mobile
             drawAnswers();
-            
-            // Conditions de rotation
             updateRotations();
         }
 
@@ -453,8 +435,6 @@
             stroke(0);
             strokeWeight(Math.max(3 / scaleFactor, 1));
             ellipse(268, 264, 536, 536);
-            
-            // Marques de degrés
             fill(0);
             noStroke();
             for (let i = 0; i < 36; i++) {
@@ -502,8 +482,6 @@
             stroke(0);
             strokeWeight(Math.max(2 / scaleFactor, 1));
             ellipse(0, 0, 500, 500);
-            
-            // Marques de la rose
             fill(0);
             noStroke();
             for (let i = 0; i < 36; i++) {
@@ -543,60 +521,46 @@
         }
 
         function drawAnswers() {
-           // Taille de texte différente selon le device
-let textSizeValue;
-if (isMobile) {
-    textSizeValue = Math.max(16 / scaleFactor, 12);
-} else {
-    textSizeValue = Math.max(20 / scaleFactor, 14);
-}
-textSize(textSizeValue);
-fill(255, 8, 8);
-
-// Calcul dynamique du lineHeight basé sur la taille de texte
-let lineHeight = Math.round(textSizeValue * 1.7);
-
-// Position adaptative
-let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-let startY = 450;
-
-// Ajustement supplémentaire pour très petits écrans
-if (scaleFactor < 0.5) {
-    startX = 600;
-}
-
-// Alignement à gauche
-textAlign(LEFT, CENTER);
-
-if (reponse) {
-    text("GT = " + Math.round(gisement) + "°", startX, startY);
-    text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
-    text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
-    text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
-} else {
-    text("GT = ?", startX, startY);
-    text("QDM = ?", startX, startY + lineHeight);
-    text("QDR = ?", startX, startY + lineHeight * 2);
-    text("Cap = ?", startX, startY + lineHeight * 3);
-}
-
-// Remettre l'alignement au centre pour le reste du dessin
-textAlign(CENTER, CENTER);
+            let textSizeValue;
+            if (isMobile) {
+                textSizeValue = Math.max(16 / scaleFactor, 12);
+            } else {
+                textSizeValue = Math.max(20 / scaleFactor, 14);
             }
+            textSize(textSizeValue);
+            fill(255, 8, 8);
+            let lineHeight = Math.round(textSizeValue * 1.7);
+            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
+            let startY = 450;
+            if (scaleFactor < 0.5) {
+                startX = 600;
+            }
+            textAlign(LEFT, CENTER);
+
+            if (reponse) {
+                text("GT = " + Math.round(gisement) + "°", startX, startY);
+                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
+                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
+                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
+            } else {
+                text("GT = ?", startX, startY);
+                text("QDM = ?", startX, startY + lineHeight);
+                text("QDR = ?", startX, startY + lineHeight * 2);
+                text("Cap = ?", startX, startY + lineHeight * 3);
+            }
+            textAlign(CENTER, CENTER);
+        }
 
         function updateRotations() {
-            // Conditions de rotation
             if (rose > 360 || rose < 0) rose = 0;
             if (gisement > 359 || gisement < 0) gisement = 0;
             if (GT > -1 || GT < -360) GT = -359;
             if (cap < 0 || cap > 359) cap = 0;
-            
             if (QDMvrai < 180) {
                 rot = 180;
             } else if (QDMvrai > 180) {
                 rot = -180;
             }
-            
             gisement = QDMvrai - cap;
             if (gisement < 0) {
                 gisement += 360;
@@ -604,32 +568,24 @@ textAlign(CENTER, CENTER);
         }
 
         function mousePressed() {
-            // Appliquer l'échelle inverse pour les coordonnées de la souris
             const scaledX = mouseX / scaleFactor;
             const scaledY = mouseY / scaleFactor;
-            
-            // Bouton CAP
             if (scaledX > 229 && scaledX < 307 && scaledY > 587 && scaledY < 614) {
                 cap = (cap + 1) % 360;
-                return false; // Empêcher la propagation
+                return false;
             }
-            
-            // Bouton QDM
             if (scaledX > 229 && scaledX < 307 && scaledY > 550 && scaledY < 575) {
                 GT = (GT - 1) % 360;
                 if (GT > -1) GT = -359;
-                return false; // Empêcher la propagation
+                return false;
             }
-            
-            // Alignement rose avec cap (centre du RBI)
             if (scaledX > 408 && scaledX < 508 && scaledY > 404 && scaledY < 504) {
                 rose = cap;
-                return false; // Empêcher la propagation
+                return false;
             }
         }
 
         function touchStarted() {
-            // Gérer les touches tactiles
             const result = mousePressed();
             return result === false ? false : true;
         }
@@ -644,7 +600,6 @@ textAlign(CENTER, CENTER);
             }
         }
 
-        // Fonctions pour l'interface
         function randomQDR() {
             GT = random(-360, 0);
         }
