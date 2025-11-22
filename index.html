@@ -465,28 +465,54 @@
         }
 
         function drawAnswers() {
-            // Taille de texte adaptative pour mobile
-            const textSizeValue = Math.max(20 / scaleFactor, 14);
+            // Détection du mode paysage mobile
+            const isMobileLandscape = window.innerWidth > window.innerHeight && window.innerWidth <= 900;
+            
+            // Taille de texte adaptative pour mobile - réduite en paysage
+            let textSizeValue;
+            if (isMobileLandscape) {
+                textSizeValue = Math.max(16 / scaleFactor, 12); // Plus petite en paysage
+            } else {
+                textSizeValue = Math.max(20 / scaleFactor, 14);
+            }
             textSize(textSizeValue);
             fill(255, 8, 8);
             
             // Position adaptative pour mobile
-            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-            let startY = 450;
+            let startX, startY;
+            
+            if (isMobileLandscape) {
+                // En mode paysage, on met les réponses plus à droite
+                startX = 700 * (scaleFactor < 0.7 ? 0.95 : 1);
+                startY = 400; // Plus haut pour libérer de l'espace
+            } else {
+                // En mode portrait
+                startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
+                startY = 450;
+            }
             
             // Ajustement dynamique de l'espacement entre les lignes
-            let lineHeight = 30 * (scaleFactor < 0.7 ? 0.8 : 1);
+            let lineHeight;
+            if (isMobileLandscape) {
+                lineHeight = 25; // Plus compact en paysage
+            } else if (scaleFactor < 0.5) {
+                lineHeight = 28;
+            } else if (scaleFactor < 0.7) {
+                lineHeight = 26;
+            } else {
+                lineHeight = 30;
+            }
             
             // Ajustement supplémentaire pour très petits écrans
             if (scaleFactor < 0.5) {
                 startX = 600;
-                lineHeight = 28; // Augmenté pour plus d'espace
+                if (!isMobileLandscape) lineHeight = 28;
             }
             
-            // Ajustement pour mobiles en paysage
-            if (window.innerHeight < 500) {
-                lineHeight = 25;
-                startY = 430;
+            // Ajustement pour mobiles en paysage très petits
+            if (isMobileLandscape && window.innerHeight < 400) {
+                lineHeight = 22;
+                startY = 380;
             }
             
             // Alignement à gauche
