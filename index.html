@@ -150,6 +150,51 @@
                 font-size: 0.75rem;
             }
         }
+        /* Aide modale */
+        #helpModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: rgba(30,30,30,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        #helpModal.active {
+            display: flex;
+        }
+        #helpModal > div {
+            background: #fff;
+            padding: 24px 20px;
+            border-radius: 12px;
+            max-width: 350px;
+            margin: 50px auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            text-align: left;
+            position: relative;
+        }
+        #closeHelpBtn {
+            position: absolute; 
+            top: 5px; 
+            right: 7px; 
+            background: transparent; 
+            border: none; 
+            font-size: 1.6em; 
+            cursor: pointer;
+        }
+        #showHelpBtn {
+            background: #eee; 
+            color: #333;
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 1rem; 
+            padding: 4px 12px; 
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +218,23 @@
         </div>
         
         <div id="rbiCanvas"></div>
+        <!-- ==== Explication contextuelle des termes ==== -->
+        <div style="text-align:center; margin-top:10px;">
+            <button id="showHelpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
+        </div>
+        <div id="helpModal">
+            <div>
+                <button id="closeHelpBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">Que signifient GT, QDM, QDR et Cap&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>GT&nbsp;:</strong> <em>Gisement transmis</em> par le RBI, angle entre le nez de l'avion et la direction de la balise.</li>
+                    <li><strong>QDM&nbsp;:</strong> Cap magnétique à suivre pour aller vers la balise depuis la position de l'avion.</li>
+                    <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s’éloigner de la balise.</li>
+                    <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l’avion par rapport au nord magnétique.</li>
+                </ul>
+            </div>
+        </div>
+        <!-- ==== fin explications ==== -->
     </div>
      <div class="instructions">
             <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
@@ -254,6 +316,20 @@
             document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {
                 e.preventDefault();
                 toggleReponse();
+            });
+
+            // Explication modale
+            document.getElementById('showHelpBtn').addEventListener('click', function() {
+                document.getElementById('helpModal').classList.add('active');
+            });
+            document.getElementById('closeHelpBtn').addEventListener('click', function() {
+                document.getElementById('helpModal').classList.remove('active');
+            });
+            // Fermer aide en cliquant hors de la boîte
+            document.getElementById('helpModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
             });
         }
 
