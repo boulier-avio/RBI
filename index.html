@@ -165,10 +165,6 @@
             </p>
         </div>
         
-        <div class="instructions">
-            <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
-        </div>
-        
         <div class="controls">
             <button id="randomQDRBtn">QDR Aléatoire (1)</button>
             <button id="randomCapBtn">Cap Aléatoire (2)</button>
@@ -178,6 +174,9 @@
         
         <div id="rbiCanvas"></div>
     </div>
+     <div class="instructions">
+            <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
+        </div>
 
     <script>
         // Variables globales
@@ -474,12 +473,20 @@
             // Position adaptative pour mobile
             let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
             let startY = 450;
+            
+            // Ajustement dynamique de l'espacement entre les lignes
             let lineHeight = 30 * (scaleFactor < 0.7 ? 0.8 : 1);
             
             // Ajustement supplémentaire pour très petits écrans
             if (scaleFactor < 0.5) {
                 startX = 600;
+                lineHeight = 28; // Augmenté pour plus d'espace
+            }
+            
+            // Ajustement pour mobiles en paysage
+            if (window.innerHeight < 500) {
                 lineHeight = 25;
+                startY = 430;
             }
             
             // Alignement à gauche
