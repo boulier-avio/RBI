@@ -165,7 +165,7 @@
             }
         }
         /* Aide modale */
-        #helpModal {
+        .modal {
             display: none;
             position: fixed;
             top: 0;
@@ -177,10 +177,10 @@
             align-items: center;
             justify-content: center;
         }
-        #helpModal.active {
+        .modal.active {
             display: flex;
         }
-        #helpModal > div {
+        .modal > div {
             background: #fff;
             padding: 24px 20px;
             border-radius: 12px;
@@ -190,7 +190,7 @@
             text-align: left;
             position: relative;
         }
-        #closeHelpBtn {
+        .closeBtn {
             position: absolute; 
             top: 5px; 
             right: 7px; 
@@ -199,7 +199,7 @@
             font-size: 1.6em; 
             cursor: pointer;
         }
-        #showHelpBtn {
+        .helpBtn {
             background: #eee; 
             color: #333;
             border: 1px solid #ccc; 
@@ -208,6 +208,13 @@
             padding: 4px 12px; 
             cursor: pointer;
             margin-bottom: 8px;
+        }
+        .help-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -222,7 +229,7 @@
             
             <div class="astuce">
                 <strong>Astuce :</strong><br>
-                • Quand la rose est calée sur le nord, la pointe de la flèche se lit directement.<br>
+                • Quand la rose est calée sur le nord, la pointe de la flèche indique le gisement.<br>
                 • Quand la rose est calée sur le cap, la pointe de la flèche indique le QDM et l'arrière de la flèche indique le QDR.
             </div>
         </div>
@@ -249,18 +256,36 @@
                 <!-- Les réponses s'affichent ici via JS -->
             </div>
         </div>
-        <div style="text-align:center; margin-top:10px;">
-            <button id="showHelpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
+        <div class="help-buttons">
+            <button id="showTermsBtn" class="helpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
+            <button id="showButtonsBtn" class="helpBtn" type="button">🔄 Explication des boutons</button>
         </div>
-        <div id="helpModal">
+        
+        <!-- Modal pour les termes -->
+        <div id="termsModal" class="modal">
             <div>
-                <button id="closeHelpBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
                 <h2 style="font-size:1.1em;margin-top:0;">Que signifient GT, QDM, QDR et Cap&nbsp;?</h2>
                 <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
                     <li><strong>GT&nbsp;:</strong> <em>Gisement transmis</em> par le RBI, angle entre le nez de l'avion et la direction de la balise.</li>
                     <li><strong>QDM&nbsp;:</strong> Cap magnétique à suivre pour aller vers la balise depuis la position de l'avion.</li>
                     <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s'éloigner de la balise.</li>
                     <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l'avion par rapport au nord magnétique.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Modal pour les boutons -->
+        <div id="buttonsModal" class="modal">
+            <div>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">À quoi servent les boutons&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>QDR Aléatoire (1)&nbsp;:</strong> Fait bouger l'avion autour de la balise NDB en changeant sa position.</li>
+                    <li><strong>Cap Aléatoire (2)&nbsp;:</strong> Change le cap (direction) de l'avion sans modifier sa position.</li>
+                    <li><strong>Les deux (3)&nbsp;:</strong> Change à la fois la position et le cap de l'avion.</li>
+                    <li><strong>Afficher/Masquer Réponse&nbsp;:</strong> Montre ou cache les valeurs réelles (GT, QDM, QDR, Cap).</li>
+                    <li><strong>Bouton HDG du RBI&nbsp;:</strong> Centre la rose sur le cap actuel de l'avion (clic au centre du RBI).</li>
                 </ul>
             </div>
         </div>
@@ -299,24 +324,39 @@
         }
 
         function setupButtonEvents() {
+            // Boutons de contrôle
             document.getElementById('randomQDRBtn').addEventListener('click', randomQDR);
             document.getElementById('randomCapBtn').addEventListener('click', randomCap);
             document.getElementById('randomBothBtn').addEventListener('click', randomBoth);
             document.getElementById('toggleReponseBtn').addEventListener('click', toggleReponse);
+            
+            // Événements tactiles
             document.getElementById('randomQDRBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomQDR();});
             document.getElementById('randomCapBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomCap();});
             document.getElementById('randomBothBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomBoth();});
             document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {e.preventDefault(); toggleReponse();});
-            document.getElementById('showHelpBtn').addEventListener('click', function() {
-                document.getElementById('helpModal').classList.add('active');
+            
+            // Boutons d'aide
+            document.getElementById('showTermsBtn').addEventListener('click', function() {
+                document.getElementById('termsModal').classList.add('active');
             });
-            document.getElementById('closeHelpBtn').addEventListener('click', function() {
-                document.getElementById('helpModal').classList.remove('active');
+            document.getElementById('showButtonsBtn').addEventListener('click', function() {
+                document.getElementById('buttonsModal').classList.add('active');
             });
-            document.getElementById('helpModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
+            
+            // Fermeture des modales
+            document.querySelectorAll('.closeBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').classList.remove('active');
+                });
+            });
+            
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
             });
         }
 
