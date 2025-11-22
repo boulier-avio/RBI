@@ -544,55 +544,45 @@
         }
 
         function drawAnswers() {
-            // Taille de texte différente selon le device
-            let textSizeValue;
-            if (isMobile) {
-                // Police réduite sur mobile
-                textSizeValue = Math.max(16 / scaleFactor, 12);
-            } else {
-                // Taille normale sur desktop
-                textSizeValue = Math.max(20 / scaleFactor, 14);
-            }
-            
-            textSize(textSizeValue);
-            fill(255, 8, 8);
-            
-            // Position adaptative
-            let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
-            let startY = 450;
-            
-            // Ajustement dynamique de l'espacement entre les lignes
-            let lineHeight;
-            if (isMobile) {
-                lineHeight = 25; // Plus compact sur mobile
-            } else {
-                lineHeight = 30;
-            }
-            
-            // Ajustement supplémentaire pour très petits écrans
-            if (scaleFactor < 0.5) {
-                startX = 600;
-                lineHeight = isMobile ? 22 : 28;
-            }
-            
-            // Alignement à gauche
-            textAlign(LEFT, CENTER);
-            
-            if (reponse) {
-                text("GT = " + Math.round(gisement) + "°", startX, startY);
-                text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
-                text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
-                text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
-            } else {
-                text("GT = ?", startX, startY);
-                text("QDM = ?", startX, startY + lineHeight);
-                text("QDR = ?", startX, startY + lineHeight * 2);
-                text("Cap = ?", startX, startY + lineHeight * 3);
-            }
-            
-            // Remettre l'alignement au centre pour le reste du dessin
-            textAlign(CENTER, CENTER);
-        }
+           // Taille de texte différente selon le device
+let textSizeValue;
+if (isMobile) {
+    textSizeValue = Math.max(16 / scaleFactor, 12);
+} else {
+    textSizeValue = Math.max(20 / scaleFactor, 14);
+}
+textSize(textSizeValue);
+fill(255, 8, 8);
+
+// Calcul dynamique du lineHeight basé sur la taille de texte
+let lineHeight = Math.round(textSizeValue * 1.7);
+
+// Position adaptative
+let startX = 650 * (scaleFactor < 0.7 ? 0.9 : 1);
+let startY = 450;
+
+// Ajustement supplémentaire pour très petits écrans
+if (scaleFactor < 0.5) {
+    startX = 600;
+}
+
+// Alignement à gauche
+textAlign(LEFT, CENTER);
+
+if (reponse) {
+    text("GT = " + Math.round(gisement) + "°", startX, startY);
+    text("QDM = " + Math.round(QDMvrai) + "°", startX, startY + lineHeight);
+    text("QDR = " + Math.round(QDRvrai) + "°", startX, startY + lineHeight * 2);
+    text("Cap = " + Math.round(cap) + "°", startX, startY + lineHeight * 3);
+} else {
+    text("GT = ?", startX, startY);
+    text("QDM = ?", startX, startY + lineHeight);
+    text("QDR = ?", startX, startY + lineHeight * 2);
+    text("Cap = ?", startX, startY + lineHeight * 3);
+}
+
+// Remettre l'alignement au centre pour le reste du dessin
+textAlign(CENTER, CENTER);
 
         function updateRotations() {
             // Conditions de rotation
